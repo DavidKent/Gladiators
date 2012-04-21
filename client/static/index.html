@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+        <title>Thunder</title>
+    </head>
+    <body bgcolor=black>
+        <div class="gs-container">
+           
+
+        </div>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="./js/lib/jquery-ui-1.8.16.custom.min.js"></script>
+        <script src="./js/lib/jquery.mousewheel.js"></script>    
+        <script src="./js/lib/Three.js"></script>
+        <script src="./socket.io/socket.io.js"></script> 
+        <script src="./js/base/packetLib/packetHandlers.js"></script>
+        <script src="./js/base/world/ray.js"></script>
+        <script src="./js/lib/RequestAnimationFrame.js"></script>
+        <script src="./js/lib/Stats.js"></script>
+        <script src="./js/lib/Tween.js"></script>
+        <script src="./js/base/world/namespaces.js"></script>
+        <script src="./js/base/world/heirarchy.js"></script>
+        <script src="./js/base/world/scene.js"></script>
+        <script src="./js/base/player/Player.js"></script>
+        <script src="./js/base/world/selection.js"></script>
+        <script src="./js/base/world/terrain.js"></script>
+        <script src="./js/base/world/skybox.js"></script>
+        <script src="./js/base/world/foliage.js"></script>
+        <script src="./js/base/world/testphys.js"></script>
+        <script src="./js/base/player/keybindings.js"></script>
+        <script src="./js/base/world/utils.js"></script>
+        <script src="./js/base/world/init.js"></script>
+        <canvas width="255" height="255" id="terrainPainter"></canvas>
+        <script>
+            var hide = function() {
+                $("#terrainPainter").hide();
+            }
+            $(document).ready(hide);
+            
+            function flattenTerrain() {
+                for(var i = 0 ; i < terrain_mesh.geometry.vertices.length; i++)
+                    {
+                       terrain_mesh.geometry.__dirtyVertices = true;
+                       terrain_mesh.geometry.vertices[i].position.z = 0;
+                    }
+                }
+        </script>
+         
+        <script type="x-shader/x-fragment" id="terrain_fragmentshader">
+            uniform sampler2D m_alpha, m_grass, m_dirt, m_sand, m_rock;
+            varying vec2 vUv;
+            varying vec4 texCoord;
+            varying vec3 pos;
+
+            void main()
+            {
+                vec4 alpha = texture2D( m_alpha, vUv ),
+                g = texture2D( m_grass, vUv * 4.0 ),
+                d = texture2D( m_dirt,  vUv * 4.0 ),
+                s = texture2D( m_sand, vUv * 4.0 ), 
+                r = texture2D( m_rock, vUv * 4.0 );
+                vec4 o;                  
+                g *= alpha.g; 
+                d = mix( g, d, alpha.r ); 
+                o = mix( d, s, alpha.b ); 
+                vec4 u = o;
+                
+                vec3 light = vec3(0.5,0.2,1.0);
+                light = normalize(light);
+                float bt = max(0.0, dot(pos, light));
+                float dd = -(bt/10.0);
+                vec4 f = vec4(u.r + dd, u.g + dd, u.b + dd, 1.0);
+                gl_FragColor = f;
+            }
+            
+        </script>
+        <style type="text/css">
+            .handle { 
+                width:25px;
+                height:25px;
+                background-image:url(assets/gizmo/div.png);
+                z-index:900000;
+                position:absolute;
+                float:left;
+            }
+        </style>
+
+        <script type="x-shader/x-vertex" id="terrain_vertexshader">
+		    varying vec2 vUv;
+            varying vec4 texCoord;
+            varying vec3 pos;
+			void main()
+			{
+				vUv = uv;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                texCoord = projectionMatrix * mvPosition;
+                pos = normal;
+				gl_Position = projectionMatrix * mvPosition;
+			}
+
+		
+        </script>
+        
+    </body>
+</html>
