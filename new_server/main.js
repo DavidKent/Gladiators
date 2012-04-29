@@ -14,10 +14,8 @@
     //Packet Handling
     var packetLib = require('./packetLib/packets.js');
     
-    //Members
-    var clients = [];
-    
     io.set('log level', 1);
+    
     
     //Handle request
     function handler(request, response) {
@@ -31,9 +29,14 @@
     
     //Handle Packets
     io.sockets.on('connection', function (socket) {
-        packetLib.handlePackets(socket);
+        packetLib.handlePackets(socket, io);
     });
     
     //Start listening
     app.listen(2000);
     console.log("Now listening on port 2000");
+    
+    //Pull io for referencing in packets
+    exports.getSocketIO = function() {
+        return io;
+    }

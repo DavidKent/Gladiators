@@ -1,25 +1,25 @@
-exports.handlePackets = function(socket) {
-    var connectionCount = 0;
-    var clients = [];
+var clients = [];
+var connections = 0;
+
+exports.handlePackets = function(socket, io) {
     
     socket.on('rotate', function (data) {
                 socket.get('ID', function(err, ID){
                 
                 });
             });
-            
-    socket.on('buildClient', function(data){
-        var id = data.name == null ? "GUEST" + connectionCount : data.name;
-        data.client.name = id;
-        var client = data.client;
-        socket.set('client', data.client, function() {
-            console.log("Set ID for user: " + id);
-            if(data.initial === false) {
-                socket.emit('updateClientHandle', {});
-                return;
-            }
-            clients.push(data.client);
-            connectionCount++;
-        });
+    
+    socket.on('clientConnect', function(data) {
+        socket.emit('getClientList', {clientID: null, clientList: clients, count: ++connections});
     });
+    
+    socket.on('addToList', function(data) {
+        clients.push(data.clientID);
+        alertClientConnected(data.clientID);
+        console.log('New connection: ' + data.clientID);
+    });
+    
+    function alertClientConnected(id) {
+        io.sockets.emit('onClientConnect', {clientID: id});
+    }
 }

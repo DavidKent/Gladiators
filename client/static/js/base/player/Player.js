@@ -1,5 +1,5 @@
-function Client(name) {
-    this.name = name;
+function Client(clientID) {
+    this.clientID = clientID;
     this.player = new Player(this);
 }
 
@@ -10,8 +10,14 @@ function Player(client) {
     this.model;
 }
 
+Client.prototype.toJSON = function() {
+    var client = {};
+    client.clientID = this.clientID;
+    return client;
+}
+
 Player.prototype.onDeath = function() {
-    console.log(this.client.name  + " has died.");
+    console.log(this.client.clientID  + " has died.");
 }
 
 Player.prototype.addToWorld = function() {
@@ -31,4 +37,8 @@ Player.prototype.setRotation = function(rot) {
 
 Player.prototype.removeFromWorld = function() {
     Thunder.Scene.scene.remove( this.model ) ;
+}
+
+getClientObject = function(data) {
+    return new Client(data.clientID);
 }
