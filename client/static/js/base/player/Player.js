@@ -1,6 +1,6 @@
-function Client(player, name) {
+function Client(name) {
     this.name = name;
-    this.player = player;
+    this.player = new Player(this);
 }
 
 function Player(client) {

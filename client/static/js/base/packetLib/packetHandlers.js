@@ -1,11 +1,7 @@
     var socket = io.connect('http://localhost:2000/');
+    var client = null;
     
-    socket.emit('setID', {});
-    socket.emit('clientConnect', {});
-    
-    socket.on('updateClientHandle', function(data){ 
-        Gladiator.nickname = data.nickname;
-    });
+    socket.emit('buildClient', {initial:true, client:new Client()});
     
     socket.on('getClients', function(data) {
         for(var i = 0; i < data.length; i++) {
@@ -15,8 +11,11 @@
     });
     
     socket.on('onClientConnect', function(data) {
-        Thunder.Clients.push(data);
-        data.addToWorld();
+        if(data.client != client) {
+            Thunder.Clients.push(data.client);
+            data.client.addToWorld();
+            console.log('new client entering game world');
+        }
     });
     
     socket.on('onClientDisconnect', function(data){
